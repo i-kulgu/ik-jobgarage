@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://kit.fontawesome.com/6b037c9e5a.js" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <script src="main.js" defer></script>
+        <link href="style.css" rel="stylesheet" id="ron">
+    </head>
+<body>
+    <div id="main-container">
+        <div data-view=${vehicle.model} class="vehicle">
+            <div class="vehicle-name">${vehicle.label}</div>
+            
+            <div class="vehicle-icon" data-model=${vehicle.model} data-model=${vehicle.label} data-price=${vehicle.normalPrice} data-index=${data.index}><i class="fas fa-arrow-circle-right"></i></div>
+        </div>
+    </div>
+</body>
+</html>  
