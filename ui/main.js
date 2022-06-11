@@ -8,8 +8,7 @@ addEventListener("message",(e)=>{
             if(vehicle.pricing){
                 let html = `
                 <div data-view=${vehicle.model} class="vehicle">
-                    <div class="vehicle-name">${vehicle.label}</div>
-                    <div class="vehicle-price">$${vehicle.price.toLocaleString()}</div>
+                <div class="vehicle-name">${vehicle.label} <div class="vehicle-price">($${vehicle.price.toLocaleString()})</div></div>
                     <div class="vehicle-icon" data-model=${vehicle.model} data-model=${vehicle.label} data-price=${vehicle.price}><i class="fas fa-arrow-circle-right"></i></div>
                 </div>
                 `
