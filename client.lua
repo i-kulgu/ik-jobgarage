@@ -62,7 +62,7 @@ Citizen.CreateThread(function()
 			local dist = #(v.Cords - pos)
 			
 			if dist < 40 and pedspawned == false then
-				TriggerEvent('ik-policegarge:spawnped',v.Cords,v.h)
+				TriggerEvent('ik-policegarage:spawnped',v.Cords,v.h)
 				pedspawned = true
 			end
 			if dist >= 35 then
@@ -73,8 +73,8 @@ Citizen.CreateThread(function()
 	end
 end)
 
-RegisterNetEvent('ik-policegarge:spawnped')
-AddEventHandler('ik-policegarge:spawnped',function(coords,heading)
+RegisterNetEvent('ik-policegarage:spawnped')
+AddEventHandler('ik-policegarage:spawnped',function(coords,heading)
 	local hash = GetHashKey('s_m_y_hwaycop_01')
 	if not HasModelLoaded(hash) then
 		RequestModel(hash)
@@ -127,7 +127,7 @@ RegisterNUICallback("showVeh", function(data,cb)
     SetVehicleExtra(veh, 2)
 end)
 
-RegisterNetEvent("ik-policegarge:client:spawn",function(model,spawnLoc,spawnHeading)
+RegisterNetEvent("ik-policegarage:client:spawn",function(model,spawnLoc,spawnHeading)
     local ped = PlayerPedId()
     RequestModel(model)
     while not HasModelLoaded(model) do Wait(100) end
@@ -159,7 +159,7 @@ RegisterNUICallback("buy", function(data,cb)
     SendNUIMessage({
         action = 'close'
     })
-    TriggerServerEvent('ik-policegarge:server:takemoney', data)
+    TriggerServerEvent('ik-policegarage:server:takemoney', data)
     SetEntityCoords(PlayerPedId(), lastpos.x, lastpos.y, lastpos.z)
     SetEntityVisible(PlayerPedId(), true)
     DeleteEntity(veh)
@@ -171,11 +171,11 @@ RegisterNUICallback("buy", function(data,cb)
     DoScreenFadeIn(500)
     Wait(500)
     if Config.savecar then
-        TriggerEvent('ik-policegarge:client:SaveCar')
+        TriggerEvent('ik-policegarage:client:SaveCar')
     end
 end)
 
-RegisterNetEvent('qb-policegarage:client:SaveCar', function()
+RegisterNetEvent('ik-policegarage:client:SaveCar', function()
     local ped = PlayerPedId()
     local veh = GetVehiclePedIsIn(ped)
 
@@ -185,7 +185,7 @@ RegisterNetEvent('qb-policegarage:client:SaveCar', function()
         local hash = props.model
         local vehname = GetDisplayNameFromVehicleModel(hash):lower()
         if QBCore.Shared.Vehicles[vehname] ~= nil and next(QBCore.Shared.Vehicles[vehname]) ~= nil then
-            TriggerServerEvent('qb-policegarage:server:SaveCarData', props, QBCore.Shared.Vehicles[vehname], hash, plate)
+            TriggerServerEvent('ik-policegarage:server:SaveCarData', props, QBCore.Shared.Vehicles[vehname], hash, plate)
         else
             QBCore.Functions.Notify('You cant store this vehicle in your garage..', 'error')
         end
@@ -207,7 +207,7 @@ RegisterNUICallback("close", function()
     Wait(500)
 end)
 
-RegisterNetEvent("ik-policegarge:openUI",function()
+RegisterNetEvent("ik-policegarage:openUI",function()
     local vehlist = {}
     changeCam()
     for k, v in pairs(Config.Garage.list) do
@@ -262,7 +262,7 @@ exports['qb-target']:AddBoxZone("npc", vector3(459.0, -1017.27, 28.29), 0.8, 0.6
   options = { 
     { 
       type = "client", 
-      event = "ik-policegarge:openUI",
+      event = "ik-policegarage:openUI",
       icon = 'fas fa-garage',
       label = 'Police Garage',
       job = 'police'

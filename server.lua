@@ -1,23 +1,23 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-RegisterServerEvent('ik-policegarge:server:takemoney', function(data)
+RegisterServerEvent('ik-policegarage:server:takemoney', function(data)
     xPlayer = QBCore.Functions.GetPlayer(source)
     if Config.enablepayment then
         if xPlayer.PlayerData.money['cash'] >= data.price then
             xPlayer.Functions.RemoveMoney('cash', data.price)
-            TriggerClientEvent('ik-policegarge:client:spawn', source, data.model)
+            TriggerClientEvent('ik-policegarage:client:spawn', source, data.model)
         elseif xPlayer.PlayerData.money['bank'] >= data.price then
             xPlayer.Functions.RemoveMoney('bank', data.price)
-            TriggerClientEvent('ik-policegarge:client:spawn', source, data.model)
+            TriggerClientEvent('ik-policegarage:client:spawn', source, data.model)
         else
             TriggerClientEvent('QBCore:Notify', src, "You don't have enough money", 'error', 3000)
         end
     else
-        TriggerClientEvent('ik-policegarge:client:spawn', source, data.model)
+        TriggerClientEvent('ik-policegarage:client:spawn', source, data.model)
     end
 end)
 
-RegisterServerEvent('ik-policegarge:server:SaveCarData', function(mods, vehicle, hash, plate)
+RegisterServerEvent('ik-policegarage:server:SaveCarData', function(mods, vehicle, hash, plate)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local result = exports.oxmysql:executeSync('SELECT plate FROM player_vehicles WHERE plate = ?', { plate })
