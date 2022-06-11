@@ -17,22 +17,52 @@ AddEventHandler('QBCore:Client:OnJobUpdate', function(JobInfo)
 end)
 
 AddEventHandler('onClientResourceStart',function()
-    QBCore.Functions.GetPlayerData(function(PlayerData)
-        if PlayerData.job then
-            PlayerJob = PlayerData.job
+    Citizen.CreateThread(function()
+        while true do
+            if QBCore ~= nil and QBCore.Functions.GetPlayerData ~= nil then
+                QBCore.Functions.GetPlayerData(function(PlayerData)
+                    if PlayerData.job then
+                        PlayerJob = PlayerData.job
+                    end
+                end)
+                break
+            end
+            Citizen.Wait(500)
         end
+        Citizen.Wait(500)
     end)
 end)
+
+local function SetCarItemsInfo()
+	local items = {}
+	for _, item in pairs(Config.CarItems) do
+		local itemInfo = QBCore.Shared.Items[item.name:lower()]
+		items[item.slot] = {
+			name = itemInfo["name"],
+			amount = tonumber(item.amount),
+			info = item.info,
+			label = itemInfo["label"],
+			description = itemInfo["description"] and itemInfo["description"] or "",
+			weight = itemInfo["weight"],
+			type = itemInfo["type"],
+			unique = itemInfo["unique"],
+			useable = itemInfo["useable"],
+			image = itemInfo["image"],
+			slot = item.slot,
+		}
+	end
+	Config.CarItems = items
+end
 
 Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(1000)
 		for k, v in pairs(Config.Pedlocation) do
-			local pos = GetEntityCoords(PlayerPedId())
+			local pos = GetEntityCoords(PlayerPedId())	
 			local dist = #(v.Cords - pos)
-
+			
 			if dist < 40 and pedspawned == false then
-				TriggerEvent('ik-policegarage:spawnped',v.Cords,v.h)
+				TriggerEvent('ik-policegarge:spawnped',v.Cords,v.h)
 				pedspawned = true
 			end
 			if dist >= 35 then
@@ -43,14 +73,14 @@ Citizen.CreateThread(function()
 	end
 end)
 
-RegisterNetEvent('ik-policegarage:spawnped')
-AddEventHandler('ik-policegarage:spawnped',function(coords,heading)
-	local hash = GetHashKey('ig_trafficwarden')
+RegisterNetEvent('ik-policegarge:spawnped')
+AddEventHandler('ik-policegarge:spawnped',function(coords,heading)
+	local hash = GetHashKey('s_m_y_hwaycop_01')
 	if not HasModelLoaded(hash) then
 		RequestModel(hash)
 		Wait(10)
 	end
-	while not HasModelLoaded(hash) do
+	while not HasModelLoaded(hash) do 
 		Wait(10)
 	end
 
@@ -60,7 +90,7 @@ AddEventHandler('ik-policegarage:spawnped',function(coords,heading)
     SetBlockingOfNonTemporaryEvents(npc, true)
     SetEntityInvincible(npc, true) --Don't let the ped die.
 
-	loadAnimDict("amb@world_human_clipboard@male@base")
+	loadAnimDict("amb@world_human_clipboard@male@base") 
 	while not TaskPlayAnim(npc, "amb@world_human_clipboard@male@base", "base", 8.0, 1.0, -1, 17, 0, 0, 0, 0) do
 	Wait(1000)
 	end
@@ -97,7 +127,7 @@ RegisterNUICallback("showVeh", function(data,cb)
     SetVehicleExtra(veh, 2)
 end)
 
-RegisterNetEvent("ik-policegarage:client:spawn",function(model,spawnLoc,spawnHeading)
+RegisterNetEvent("ik-policegarge:client:spawn",function(model,spawnLoc,spawnHeading)
     local ped = PlayerPedId()
     RequestModel(model)
     while not HasModelLoaded(model) do Wait(100) end
@@ -117,6 +147,11 @@ RegisterNetEvent("ik-policegarage:client:spawn",function(model,spawnLoc,spawnHea
     SetVehicleEngineOn(veh, true, true)
     SetVehicleModKit(veh, 0)
 
+    if Config.UseCarItems then
+        SetCarItemsInfo()
+        TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Config.CarItems)
+    end
+ 
 end)
 
 RegisterNUICallback("buy", function(data,cb)
@@ -124,7 +159,7 @@ RegisterNUICallback("buy", function(data,cb)
     SendNUIMessage({
         action = 'close'
     })
-    TriggerServerEvent('ik-policegarage:server:takemoney', data)
+    TriggerServerEvent('ik-policegarge:server:takemoney', data)
     SetEntityCoords(PlayerPedId(), lastpos.x, lastpos.y, lastpos.z)
     SetEntityVisible(PlayerPedId(), true)
     DeleteEntity(veh)
@@ -135,6 +170,28 @@ RegisterNUICallback("buy", function(data,cb)
     SetNuiFocus(false, false)
     DoScreenFadeIn(500)
     Wait(500)
+    if Config.savecar then
+        TriggerEvent('ik-policegarge:client:SaveCar')
+    end
+end)
+
+RegisterNetEvent('qb-policegarage:client:SaveCar', function()
+    local ped = PlayerPedId()
+    local veh = GetVehiclePedIsIn(ped)
+
+    if veh ~= nil and veh ~= 0 then
+        local plate = QBCore.Functions.GetPlate(veh)
+        local props = QBCore.Functions.GetVehicleProperties(veh)
+        local hash = props.model
+        local vehname = GetDisplayNameFromVehicleModel(hash):lower()
+        if QBCore.Shared.Vehicles[vehname] ~= nil and next(QBCore.Shared.Vehicles[vehname]) ~= nil then
+            TriggerServerEvent('qb-policegarage:server:SaveCarData', props, QBCore.Shared.Vehicles[vehname], hash, plate)
+        else
+            QBCore.Functions.Notify('You cant store this vehicle in your garage..', 'error')
+        end
+    else
+        QBCore.Functions.Notify('You are not in a vehicle..', 'error')
+    end
 end)
 
 RegisterNUICallback("close", function()
@@ -150,18 +207,23 @@ RegisterNUICallback("close", function()
     Wait(500)
 end)
 
-RegisterNetEvent("ik-policegarage:openUI",function()
+RegisterNetEvent("ik-policegarge:openUI",function()
     local vehlist = {}
     changeCam()
     for k, v in pairs(Config.Garage.list) do
 		if v.rank then
-            if v.rank then
-                for _, b in pairs(v.rank) do
-                    if b == PlayerJob.grade.level then
-                        local vehicle = {label = v.label, model = v.model}
-                        vehlist[#vehlist+1] = vehicle
-                    end
-                end
+            if v.rank then 
+                for _, b in pairs(v.rank) do 
+                    if b == PlayerJob.grade.level then 
+                        if Config.enablepayment then
+                            local vehicle = {label = v.label, model = v.model, price = v.price}
+                            vehlist[#vehlist+1] = vehicle
+                        else
+                            local vehicle = {label = v.label, model = v.model}
+                            vehlist[#vehlist+1] = vehicle
+                        end
+                    end 
+                end 
             end
 		end
         SendNUIMessage({
@@ -197,14 +259,15 @@ exports['qb-target']:AddBoxZone("npc", vector3(459.0, -1017.27, 28.29), 0.8, 0.6
   minZ=27.94,
   maxZ=28.99
 }, {
-  options = {
-    {
-      type = "client",
-      event = "ik-policegarage:openUI",
+  options = { 
+    { 
+      type = "client", 
+      event = "ik-policegarge:openUI",
       icon = 'fas fa-garage',
       label = 'Police Garage',
       job = 'police'
     }
   },
-  distance = 2.5,
+  distance = 1.5,
 })
+
