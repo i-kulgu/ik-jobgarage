@@ -1,21 +1,12 @@
-fx_version 'bodacious'
+fx_version 'cerulean'
+author "proportions"
+version "v1.2"
+description "Police garage script with rank system"
+game "gta5"
 
-games { 'gta5' }
-
-client_scripts {
-
-    'config.lua',
-
-    'cl_garage.lua'
-
-}
-
-server_script 'sv_garage.lua'
-
+shared_scripts {'config.lua'}
+client_scripts {'client.lua'}
+server_scripts {'server.lua'}
 ui_page 'ui/index.html'
 
-files {
-    
-    'ui/*'
-    
-}
+files {'ui/*'}
