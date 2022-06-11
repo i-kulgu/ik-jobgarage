@@ -216,10 +216,10 @@ RegisterNetEvent("ik-policegarge:openUI",function()
                 for _, b in pairs(v.rank) do 
                     if b == PlayerJob.grade.level then 
                         if Config.enablepayment then
-                            local vehicle = {label = v.label, model = v.model, price = v.price}
+                            local vehicle = {label = v.label, model = v.model, price = v.price, pricing = true}
                             vehlist[#vehlist+1] = vehicle
                         else
-                            local vehicle = {label = v.label, model = v.model}
+                            local vehicle = {label = v.label, model = v.model, pricing = false}
                             vehlist[#vehlist+1] = vehicle
                         end
                     end 

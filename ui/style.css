@@ -71,5 +71,6 @@
     padding: 5px;
 }
 .vehicle-price{
-    padding: 0px 0px 5px 5px;
+    float: right;
+    padding-right: 20%;
 }
