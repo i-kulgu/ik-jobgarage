@@ -132,6 +132,7 @@ RegisterNetEvent("ik-policegarage:client:spawn",function(model,spawnLoc,spawnHea
     RequestModel(model)
     while not HasModelLoaded(model) do Wait(100) end
     local veh = CreateVehicle(model, Config.spawnloc.coords, Config.spawnloc.heading, true, true)
+    TaskWarpPedIntoVehicle(ped, veh, -1)
     SetVehicleExtra(veh, 1)
     SetVehicleExtra(veh, 2)
     SetVehicleExtra(veh, 4)
@@ -141,12 +142,13 @@ RegisterNetEvent("ik-policegarage:client:spawn",function(model,spawnLoc,spawnHea
     SetVehicleDirtLevel(veh, 0)
     SetVehicleNumberPlateText(model, plate)
     exports['LegacyFuel']:SetFuel(veh, 100.0)
-    TaskWarpPedIntoVehicle(ped, veh, -1)
     TriggerEvent("vehiclekeys:client:SetOwner", GetVehicleNumberPlateText(veh))
     SetEntityHeading(veh, spawnHeading)
     SetVehicleEngineOn(veh, true, true)
     SetVehicleModKit(veh, 0)
-
+    if Config.savecar then
+        TriggerEvent('ik-policegarage:client:SaveCar')
+    end
     if Config.UseCarItems then
         SetCarItemsInfo()
         TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Config.CarItems)
@@ -170,9 +172,6 @@ RegisterNUICallback("buy", function(data,cb)
     SetNuiFocus(false, false)
     DoScreenFadeIn(500)
     Wait(500)
-    if Config.savecar then
-        TriggerEvent('ik-policegarage:client:SaveCar')
-    end
 end)
 
 RegisterNetEvent('ik-policegarage:client:SaveCar', function()

@@ -10,7 +10,7 @@ RegisterServerEvent('ik-policegarage:server:takemoney', function(data)
             xPlayer.Functions.RemoveMoney('bank', data.price)
             TriggerClientEvent('ik-policegarage:client:spawn', source, data.model)
         else
-            TriggerClientEvent('QBCore:Notify', src, "You don't have enough money", 'error', 3000)
+            TriggerClientEvent('QBCore:Notify', source, "You don't have enough money", 'error', 3000)
         end
     else
         TriggerClientEvent('ik-policegarage:client:spawn', source, data.model)
