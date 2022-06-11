@@ -2,7 +2,9 @@
 
 - Easy to configure policegarage
 - Cars are based on police ranks
-- Player don't own the cars because of unneccessary owned cars table
+- Optional pricing for cars
+- Optional to save car into data
+- Optional to give trunk items
 
 Preview:
 
