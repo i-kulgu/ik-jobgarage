@@ -8,8 +8,8 @@ addEventListener("message",(e)=>{
             let html = `
             <div data-view=${vehicle.model} class="vehicle">
                 <div class="vehicle-name">${vehicle.label}</div>
-                
-                <div class="vehicle-icon" data-model=${vehicle.model} data-model=${vehicle.label}><i class="fas fa-arrow-circle-right"></i></div>
+                <div class="vehicle-price">$${vehicle.price.toLocaleString()}</div>
+                <div class="vehicle-icon" data-model=${vehicle.model} data-model=${vehicle.label} data-price=${vehicle.price}><i class="fas fa-arrow-circle-right"></i></div>
             </div>
             `
             $("#main-container").append(html);
@@ -17,8 +17,9 @@ addEventListener("message",(e)=>{
         $(".vehicle-icon").click(function() {
             let model = $(this).data("model");
             let label = $(this).data("label");
+            let price = $(this).data("price");
             // $("#main-container").fadeOut()
-            $.post("https://qb-policegarage/buy",JSON.stringify({model,label}));
+            $.post("https://ik-policegarge/buy",JSON.stringify({model,label,price}));
         
         })
         let lastmodel = 0;
@@ -27,12 +28,12 @@ addEventListener("message",(e)=>{
             let model = $(this).data("view");
             if(lastmodel != model){
                 lastmodel = model
-                $.post("https://qb-policegarage/showVeh",JSON.stringify({model}));
+                $.post("https://ik-policegarge/showVeh",JSON.stringify({model}));
             }
         })
     } else if(data.action == "close") {
         $("#main-container").fadeOut()
-        $.post("https://qb-policegarage/close",JSON.stringify({}));
+        $.post("https://ik-policegarge/close",JSON.stringify({}));
     }
 })
 
@@ -42,6 +43,6 @@ document.onkeydown = (e) =>{
     if(key == "Escape"){
 
         $("#main-container").fadeOut()
-        $.post("https://qb-policegarage/close",JSON.stringify({}));
+        $.post("https://ik-policegarge/close",JSON.stringify({}));
     }
 }
