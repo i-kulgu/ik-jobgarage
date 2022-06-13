@@ -54,13 +54,39 @@ local function SetCarItemsInfo()
 	Config.CarItems = items
 end
 
+local function PerformanceUpgradeVehicle(vehicle)
+    local max
+    local mods = {}
+    if Config.CarMods.engine then
+        mods = mods + {11,}
+    end
+    if Config.CarMods.brakes then
+        mods = mods + {12,}
+    end
+    if Config.CarMods.gearbox then
+        mods = mods + {13,}
+    end
+    if Config.CarMods.armour then
+        mods = mods + {14,}
+    end
+    if DoesEntityExist(vehicle) and IsEntityAVehicle(vehicle) then
+        for _,modType in pairs(mods) do
+            max = GetNumVehicleMods(vehicle, modType) - 1
+            SetVehicleMod(vehicle, modType, max, customWheels)
+        end
+        if Config.CarMods.turbo then
+            ToggleVehicleMod(vehicle, 18, true)
+        end
+    end
+end
+
 Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(1000)
 		for k, v in pairs(Config.Pedlocation) do
-			local pos = GetEntityCoords(PlayerPedId())	
+			local pos = GetEntityCoords(PlayerPedId())
 			local dist = #(v.Cords - pos)
-			
+
 			if dist < 40 and pedspawned == false then
 				TriggerEvent('ik-policegarage:spawnped',v.Cords,v.h)
 				pedspawned = true
@@ -80,7 +106,7 @@ AddEventHandler('ik-policegarage:spawnped',function(coords,heading)
 		RequestModel(hash)
 		Wait(10)
 	end
-	while not HasModelLoaded(hash) do 
+	while not HasModelLoaded(hash) do
 		Wait(10)
 	end
 
@@ -90,7 +116,7 @@ AddEventHandler('ik-policegarage:spawnped',function(coords,heading)
     SetBlockingOfNonTemporaryEvents(npc, true)
     SetEntityInvincible(npc, true) --Don't let the ped die.
 
-	loadAnimDict("amb@world_human_clipboard@male@base") 
+	loadAnimDict("amb@world_human_clipboard@male@base")
 	while not TaskPlayAnim(npc, "amb@world_human_clipboard@male@base", "base", 8.0, 1.0, -1, 17, 0, 0, 0, 0) do
 	Wait(1000)
 	end
@@ -133,12 +159,6 @@ RegisterNetEvent("ik-policegarage:client:spawn",function(model,spawnLoc,spawnHea
     while not HasModelLoaded(model) do Wait(100) end
     local veh = CreateVehicle(model, Config.spawnloc.coords, Config.spawnloc.heading, true, true)
     TaskWarpPedIntoVehicle(ped, veh, -1)
-    SetVehicleExtra(veh, 1)
-    SetVehicleExtra(veh, 2)
-    SetVehicleExtra(veh, 4)
-    SetVehicleExtra(veh, 5)
-    SetVehicleExtra(veh, 6)
-    SetVehicleExtra(veh, 7)
     SetVehicleDirtLevel(veh, 0)
     SetVehicleNumberPlateText(model, plate)
     exports['LegacyFuel']:SetFuel(veh, 100.0)
@@ -146,6 +166,14 @@ RegisterNetEvent("ik-policegarage:client:spawn",function(model,spawnLoc,spawnHea
     SetEntityHeading(veh, spawnHeading)
     SetVehicleEngineOn(veh, true, true)
     SetVehicleModKit(veh, 0)
+    if Config.CustomLivery then
+        SetVehicleLivery(veh, Config.CarExtras.livery)
+    end
+    if Config.CustomExtras then
+        if Config.CarExtras.extras ~=  nil then
+            QBCore.Shared.SetDefaultVehicleExtras(veh, Config.CarExtras.extras)
+        end
+    end
     if Config.savecar then
         TriggerEvent('ik-policegarage:client:SaveCar')
     end
@@ -153,7 +181,9 @@ RegisterNetEvent("ik-policegarage:client:spawn",function(model,spawnLoc,spawnHea
         SetCarItemsInfo()
         TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Config.CarItems)
     end
- 
+    if Config.MaxMod then
+        PerformanceUpgradeVehicle(veh)
+    end
 end)
 
 RegisterNUICallback("buy", function(data,cb)
@@ -211,9 +241,9 @@ RegisterNetEvent("ik-policegarage:openUI",function()
     changeCam()
     for k, v in pairs(Config.Garage.list) do
 		if v.rank then
-            if v.rank then 
-                for _, b in pairs(v.rank) do 
-                    if b == PlayerJob.grade.level then 
+            if v.rank then
+                for _, b in pairs(v.rank) do
+                    if b == PlayerJob.grade.level then
                         if Config.enablepayment then
                             local vehicle = {label = v.label, model = v.model, price = v.price, pricing = true}
                             vehlist[#vehlist+1] = vehicle
@@ -221,8 +251,8 @@ RegisterNetEvent("ik-policegarage:openUI",function()
                             local vehicle = {label = v.label, model = v.model, pricing = false}
                             vehlist[#vehlist+1] = vehicle
                         end
-                    end 
-                end 
+                    end
+                end
             end
 		end
         SendNUIMessage({
@@ -258,9 +288,9 @@ exports['qb-target']:AddBoxZone("npc", vector3(459.0, -1017.27, 28.29), 0.8, 0.6
   minZ=27.94,
   maxZ=28.99
 }, {
-  options = { 
-    { 
-      type = "client", 
+  options = {
+    {
+      type = "client",
       event = "ik-policegarage:openUI",
       icon = 'fas fa-garage',
       label = 'Police Garage',
