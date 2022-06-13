@@ -9,6 +9,8 @@
 - Enable / Disable custom livery
 - Enable / Disable max mod for engine, brakes, gearbox, armour and enable/disable turbo.
 
+( For any help you can reach us at Discord: [Hi-Dev](https://discord.com/invite/pSJPPctrNx) )
+
 Preview:
 
 https://streamable.com/i0qklk
