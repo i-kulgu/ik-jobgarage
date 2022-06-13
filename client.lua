@@ -58,21 +58,21 @@ local function PerformanceUpgradeVehicle(vehicle)
     local max
     local mods = {}
     if Config.CarMods.engine then
-        mods = mods + {11,}
+        mods[#mods+1] = 11
     end
     if Config.CarMods.brakes then
-        mods = mods + {12,}
+        mods[#mods+1] = 12
     end
     if Config.CarMods.gearbox then
-        mods = mods + {13,}
+        mods[#mods+1] = 13
     end
     if Config.CarMods.armour then
-        mods = mods + {14,}
+        mods[#mods+1] = 14
     end
     if DoesEntityExist(vehicle) and IsEntityAVehicle(vehicle) then
         for _,modType in pairs(mods) do
             max = GetNumVehicleMods(vehicle, modType) - 1
-            SetVehicleMod(vehicle, modType, max, customWheels)
+            SetVehicleMod(vehicle, modType, max, false)
         end
         if Config.CarMods.turbo then
             ToggleVehicleMod(vehicle, 18, true)
