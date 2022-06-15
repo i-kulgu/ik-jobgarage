@@ -8,7 +8,7 @@ Config.MaxMod = false -- Set this to true if you want your vehicle max modded. L
 Config.viewcoords = vector3(454.75, -1020.45, 28.32)
 
 Config.spawnloc = {
-    coords = vector3(455.45, -1023.67, 28.46),
+    coords = vector4(455.45, -1023.67, 28.46, 49.96),
     heading = 49.96
 }
 

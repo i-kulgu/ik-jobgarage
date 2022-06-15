@@ -1,5 +1,5 @@
 fx_version 'cerulean'
-author "proportions"
+author "Proportions#8460"
 version "v1.2"
 description "Police garage script with rank system"
 game "gta5"

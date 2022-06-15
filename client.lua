@@ -153,37 +153,38 @@ RegisterNUICallback("showVeh", function(data,cb)
     SetVehicleExtra(veh, 2)
 end)
 
-RegisterNetEvent("ik-policegarage:client:spawn",function(model,spawnLoc,spawnHeading)
+RegisterNetEvent("ik-policegarage:client:spawn",function(model)
     local ped = PlayerPedId()
     RequestModel(model)
     while not HasModelLoaded(model) do Wait(100) end
-    local veh = CreateVehicle(model, Config.spawnloc.coords, Config.spawnloc.heading, true, true)
-    TaskWarpPedIntoVehicle(ped, veh, -1)
-    SetVehicleDirtLevel(veh, 0)
-    SetVehicleNumberPlateText(model, plate)
-    exports['LegacyFuel']:SetFuel(veh, 100.0)
-    TriggerEvent("vehiclekeys:client:SetOwner", GetVehicleNumberPlateText(veh))
-    SetEntityHeading(veh, spawnHeading)
-    SetVehicleEngineOn(veh, true, true)
-    SetVehicleModKit(veh, 0)
-    if Config.CustomLivery then
-        SetVehicleLivery(veh, Config.CarExtras.livery)
-    end
-    if Config.CustomExtras then
-        if Config.CarExtras.extras ~=  nil then
-            QBCore.Shared.SetDefaultVehicleExtras(veh, Config.CarExtras.extras)
+    QBCore.Functions.SpawnVehicle(model,function(veh)
+        TaskWarpPedIntoVehicle(ped, veh, -1)
+        SetVehicleDirtLevel(veh, 0)
+        SetVehicleNumberPlateText(model, plate)
+        exports['LegacyFuel']:SetFuel(veh, 100.0)
+        TriggerEvent("vehiclekeys:client:SetOwner", GetVehicleNumberPlateText(veh))
+        SetEntityHeading(veh, Config.spawnloc.heading)
+        SetVehicleEngineOn(veh, true, true)
+        SetVehicleModKit(veh, 0)
+        if Config.CustomLivery then
+            SetVehicleLivery(veh, Config.CarExtras.livery)
         end
-    end
-    if Config.savecar then
-        TriggerEvent('ik-policegarage:client:SaveCar')
-    end
-    if Config.UseCarItems then
-        SetCarItemsInfo()
-        TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Config.CarItems)
-    end
-    if Config.MaxMod then
-        PerformanceUpgradeVehicle(veh)
-    end
+        if Config.CustomExtras then
+            if Config.CarExtras.extras ~=  nil then
+                QBCore.Shared.SetDefaultVehicleExtras(veh, Config.CarExtras.extras)
+            end
+        end
+        if Config.savecar then
+            TriggerEvent('ik-policegarage:client:SaveCar')
+        end
+        if Config.UseCarItems then
+            SetCarItemsInfo()
+            TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Config.CarItems)
+        end
+        if Config.MaxMod then
+            PerformanceUpgradeVehicle(veh)
+        end
+    end,Config.spawnloc.coords, true)
 end)
 
 RegisterNUICallback("buy", function(data,cb)
