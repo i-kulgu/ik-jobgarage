@@ -54,6 +54,32 @@ local function SetCarItemsInfo()
 	Config.CarItems = items
 end
 
+local function PerformanceUpgradeVehicle(vehicle)
+    local max
+    local mods = {}
+    if Config.CarMods.engine then
+        mods[#mods+1] = 11
+    end
+    if Config.CarMods.brakes then
+        mods[#mods+1] = 12
+    end
+    if Config.CarMods.gearbox then
+        mods[#mods+1] = 13
+    end
+    if Config.CarMods.armour then
+        mods[#mods+1] = 14
+    end
+    if DoesEntityExist(vehicle) and IsEntityAVehicle(vehicle) then
+        for _,modType in pairs(mods) do
+            max = GetNumVehicleMods(vehicle, modType) - 1
+            SetVehicleMod(vehicle, modType, max, false)
+        end
+        if Config.CarMods.turbo then
+            ToggleVehicleMod(vehicle, 18, true)
+        end
+    end
+end
+
 Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(1000)
@@ -140,9 +166,9 @@ RegisterNetEvent("ik-policegarage:client:spawn",function(model)
         TaskWarpPedIntoVehicle(ped, veh, -1)
         SetVehicleDirtLevel(veh, 0)
         local nummer = math.random(1111,9999)
-        local plate = "POL"..nummer
+        local plate = Config.plateprefix..""..nummer
         SetVehicleNumberPlateText(veh, plate)
-        exports['ps-fuel']:SetFuel(veh, 100.0)
+        exports[Config.fuelsystem]:SetFuel(veh, 100.0)
         TriggerEvent("vehiclekeys:client:SetOwner", plate)
         SetEntityHeading(veh, Config.spawnloc.heading)
         SetVehicleEngineOn(veh, true, true)
@@ -189,7 +215,7 @@ end)
 RegisterNetEvent('ik-policegarage:client:SaveCar', function()
     local ped = PlayerPedId()
     local veh = GetVehiclePedIsIn(ped)
-
+    while veh == nil do Wait(100) end
     if veh ~= nil and veh ~= 0 then
         local plate = QBCore.Functions.GetPlate(veh)
         local props = QBCore.Functions.GetVehicleProperties(veh)
