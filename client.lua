@@ -2,7 +2,6 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local cam
 local lastpos
 local veh
-local pedspawned = false
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
@@ -81,59 +80,26 @@ local function PerformanceUpgradeVehicle(vehicle)
 end
 
 Citizen.CreateThread(function()
-	while true do
-		Citizen.Wait(1000)
-		for k, v in pairs(Config.Pedlocation) do
-			local pos = GetEntityCoords(PlayerPedId())	
-			local dist = #(v.Cords - pos)
-			
-			if dist < 40 and pedspawned == false then
-				TriggerEvent('ik-policegarage:spawnped',v.Cords,v.h)
-				pedspawned = true
-                exports['qb-target']:AddBoxZone("npc"..k, v.Cords, 0.8, 0.6, {
-                    name = "npc"..k, heading=v.h, debugPoly=false, minZ=v.Cords.z - 2, maxZ=v.Cords.z + 2,}, {
-                    options = {{ type = "client", event = "ik-policegarage:openUI", icon = 'fas fa-garage', label = 'Police Garage', job = 'police' }},
-                    distance = 1.5,})
-			end
-			if dist >= 35 then
-			if pedspawned then
-					DeletePed(npc)
-			pedspawned = false
-			end
-			end
-		end
-	end
-end)
-
-RegisterNetEvent('ik-policegarage:spawnped')
-AddEventHandler('ik-policegarage:spawnped',function(coords,heading)
-	local hash = GetHashKey('s_m_y_hwaycop_01')
-	if not HasModelLoaded(hash) then
-		RequestModel(hash)
-		Wait(10)
-	end
-	while not HasModelLoaded(hash) do 
-		Wait(10)
-	end
-
-    pedspawned = true
-	npc = CreatePed(5, hash, coords, heading, false, false)
-	FreezeEntityPosition(npc, true)
-    SetBlockingOfNonTemporaryEvents(npc, true)
-    SetEntityInvincible(npc, true) --Don't let the ped die.
-
-	loadAnimDict("amb@world_human_clipboard@male@base") 
-	while not TaskPlayAnim(npc, "amb@world_human_clipboard@male@base", "base", 8.0, 1.0, -1, 17, 0, 0, 0, 0) do
-	Wait(1000)
-	end
-end)
-
-function loadAnimDict( dict )
-    while ( not HasAnimDictLoaded( dict ) ) do
-        RequestAnimDict( dict )
-        Citizen.Wait( 5 )
+        local hash = GetHashKey('s_m_y_hwaycop_01')
+        if not HasModelLoaded(hash) then
+            RequestModel(hash)
+            Wait(10)
+        end
+        while not HasModelLoaded(hash) do 
+            Wait(10)
+        end
+    for k, v in pairs(Config.Pedlocation) do
+        npc = CreatePed(5, hash, v.Cords, v.h, false, false)
+        FreezeEntityPosition(npc, true)
+        SetBlockingOfNonTemporaryEvents(npc, true)
+        SetEntityInvincible(npc, true) --Don't let the ped die.
+        TaskStartScenarioInPlace(npc, "WORLD_HUMAN_CLIPBOARD", 0, true)
+        exports['qb-target']:AddBoxZone("npc"..k, v.Cords, 0.8, 0.6, {
+            name = "npc"..k, heading=v.h, debugPoly=false, minZ=v.Cords.z - 2, maxZ=v.Cords.z + 2,}, {
+            options = {{ type = "client", event = "ik-policegarage:openUI", icon = 'fas fa-garage', label = 'Police Garage', job = 'police' }},
+            distance = 1.5,})
     end
-end
+end)
 
 function openUI(data,index,cb)
     local plyPed = PlayerPedId()
