@@ -96,9 +96,10 @@ Citizen.CreateThread(function()
                     distance = 1.5,})
 			end
 			if dist >= 35 then
-                exports['qb-target']:RemoveZone("npc"..k)
-				pedspawned = false
-				DeletePed(npc)
+			if pedspawned then
+					DeletePed(npc)
+			pedspawned = false
+			end
 			end
 		end
 	end
