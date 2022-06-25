@@ -1,7 +1,7 @@
-# ik-policegarage
+# ik-jobgarage
 
-- Easy to configure policegarage
-- Cars are based on police ranks
+- Easy to configure multiple garages
+- Cars are based on job ranks for specific garage
 - Optional pricing for cars
 - Optional to save car into data
 - Optional to give trunk items

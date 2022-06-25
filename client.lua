@@ -34,21 +34,23 @@ end)
 
 local function SetCarItemsInfo()
 	local items = {}
-	for _, item in pairs(Config.CarItems) do
-		local itemInfo = QBCore.Shared.Items[item.name:lower()]
-		items[item.slot] = {
-			name = itemInfo["name"],
-			amount = tonumber(item.amount),
-			info = item.info,
-			label = itemInfo["label"],
-			description = itemInfo["description"] and itemInfo["description"] or "",
-			weight = itemInfo["weight"],
-			type = itemInfo["type"],
-			unique = itemInfo["unique"],
-			useable = itemInfo["useable"],
-			image = itemInfo["image"],
-			slot = item.slot,
-		}
+	for k, v in pairs(Garage) do
+        for l, m in pairs(v.CarItems) do
+            local itemInfo = QBCore.Shared.Items[m.name:lower()]
+            items[m.slot] = {
+                name = itemInfo["name"],
+                amount = tonumber(m.amount),
+                info = m.info,
+                label = itemInfo["label"],
+                description = itemInfo["description"] and itemInfo["description"] or "",
+                weight = itemInfo["weight"],
+                type = itemInfo["type"],
+                unique = itemInfo["unique"],
+                useable = itemInfo["useable"],
+                image = itemInfo["image"],
+                slot = m.slot,
+            }
+        end
 	end
 	Config.CarItems = items
 end
@@ -56,25 +58,27 @@ end
 local function PerformanceUpgradeVehicle(vehicle)
     local max
     local mods = {}
-    if Config.CarMods.engine then
-        mods[#mods+1] = 11
-    end
-    if Config.CarMods.brakes then
-        mods[#mods+1] = 12
-    end
-    if Config.CarMods.gearbox then
-        mods[#mods+1] = 13
-    end
-    if Config.CarMods.armour then
-        mods[#mods+1] = 14
-    end
-    if DoesEntityExist(vehicle) and IsEntityAVehicle(vehicle) then
-        for _,modType in pairs(mods) do
-            max = GetNumVehicleMods(vehicle, modType) - 1
-            SetVehicleMod(vehicle, modType, max, false)
+    for k,v in pairs(Garage) do
+        if v.CarMods.engine then
+            mods[#mods+1] = 11
         end
-        if Config.CarMods.turbo then
-            ToggleVehicleMod(vehicle, 18, true)
+        if v.CarMods.brakes then
+            mods[#mods+1] = 12
+        end
+        if v.CarMods.gearbox then
+            mods[#mods+1] = 13
+        end
+        if v.CarMods.armour then
+            mods[#mods+1] = 14
+        end
+        if DoesEntityExist(vehicle) and IsEntityAVehicle(vehicle) then
+            for _,modType in pairs(mods) do
+                max = GetNumVehicleMods(vehicle, modType) - 1
+                SetVehicleMod(vehicle, modType, max, false)
+            end
+            if v.CarMods.turbo then
+                ToggleVehicleMod(vehicle, 18, true)
+            end
         end
     end
 end
@@ -88,15 +92,15 @@ Citizen.CreateThread(function()
         while not HasModelLoaded(hash) do 
             Wait(10)
         end
-    for k, v in pairs(Config.Pedlocation) do
-        npc = CreatePed(5, hash, v.Cords, v.h, false, false)
+    for k, v in pairs(Garage) do
+        npc = CreatePed(5, hash, v.pedlocation, v.pedheading, false, false)
         FreezeEntityPosition(npc, true)
         SetBlockingOfNonTemporaryEvents(npc, true)
         SetEntityInvincible(npc, true) --Don't let the ped die.
         TaskStartScenarioInPlace(npc, "WORLD_HUMAN_CLIPBOARD", 0, true)
-        exports['qb-target']:AddBoxZone("npc"..k, v.Cords, 0.8, 0.6, {
-            name = "npc"..k, heading=v.h, debugPoly=false, minZ=v.Cords.z - 2, maxZ=v.Cords.z + 2,}, {
-            options = {{ type = "client", event = "ik-policegarage:openUI", icon = 'fas fa-garage', label = 'Police Garage', job = 'police' }},
+        exports['qb-target']:AddBoxZone("npc"..k, v.pedlocation, 0.8, 0.6, {
+            name = "npc"..k, heading=v.pedheading, debugPoly=false, minZ=v.pedlocation.z - 2, maxZ=v.pedlocation.z + 2,}, {
+            options = {{ type = "client", event = "ik-policegarage:openUI", garage = k, icon = 'fas fa-garage', label = 'Police Garage', job = 'police' }},
             distance = 1.5,})
     end
 end)
@@ -110,7 +114,8 @@ function openUI(data,index,cb)
 end
 
 RegisterNUICallback("showVeh", function(data,cb)
-    local pos = Config.viewcoords
+    local gar = data.garage
+    local pos = Garage[gar].viewcoords
     if DoesEntityExist(veh) then
         DeleteEntity(veh)
         while DoesEntityExist(veh) do Wait(250) end
@@ -125,7 +130,7 @@ RegisterNUICallback("showVeh", function(data,cb)
     SetVehicleExtra(veh, 2)
 end)
 
-RegisterNetEvent("ik-policegarage:client:spawn",function(model)
+RegisterNetEvent("ik-policegarage:client:spawn",function(model, pos, garage)
     local ped = PlayerPedId()
     RequestModel(model)
     while not HasModelLoaded(model) do Wait(100) end
@@ -133,37 +138,38 @@ RegisterNetEvent("ik-policegarage:client:spawn",function(model)
         TaskWarpPedIntoVehicle(ped, veh, -1)
         SetVehicleDirtLevel(veh, 0)
         local nummer = math.random(1111,9999)
-        local plate = Config.plateprefix..""..nummer
+        local plate = Garage[garage].plateprefix..""..nummer
         SetVehicleNumberPlateText(veh, plate)
         exports[Config.fuelsystem]:SetFuel(veh, 100.0)
         TriggerEvent("vehiclekeys:client:SetOwner", plate)
-        SetEntityHeading(veh, Config.spawnloc.heading)
+        SetEntityHeading(veh, Garage[garage].spawnheading)
         SetVehicleEngineOn(veh, true, true)
         SetVehicleModKit(veh, 0)
         if Config.CustomLivery then
-            SetVehicleLivery(veh, Config.CarExtras.livery)
+            SetVehicleLivery(veh, Garage[garage].CarExtras.livery)
         end
         if Config.CustomExtras then
-            if Config.CarExtras.extras ~=  nil then
-                QBCore.Shared.SetDefaultVehicleExtras(veh, Config.CarExtras.extras)
+            if Garage[garage].CarExtras.extras ~=  nil then
+                QBCore.Shared.SetDefaultVehicleExtras(veh, Garage[garage].CarExtras.extras)
             end
         end
         if Config.UseCarItems then
             SetCarItemsInfo()
-            TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Config.CarItems)
+            TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Garage[garage].CarItems)
         end
         if Config.MaxMod then
             PerformanceUpgradeVehicle(veh)
         end
-    end,Config.spawnloc.coords, true)
+    end,pos, true)
 end)
 
 RegisterNUICallback("buy", function(data,cb)
-
+    local gar = data.garage
+    local pos = Garage[gar].spawnloc
     SendNUIMessage({
         action = 'close'
     })
-    TriggerServerEvent('ik-policegarage:server:takemoney', data)
+    TriggerServerEvent('ik-policegarage:server:takemoney', data, pos)
     SetEntityCoords(PlayerPedId(), lastpos.x, lastpos.y, lastpos.z)
     SetEntityVisible(PlayerPedId(), true)
     DeleteEntity(veh)
@@ -211,24 +217,23 @@ RegisterNUICallback("close", function()
     Wait(500)
 end)
 
-RegisterNetEvent("ik-policegarage:openUI",function()
+RegisterNetEvent("ik-policegarage:openUI",function(data)
+    local gar = data.garage
     local vehlist = {}
     changeCam()
-    for k, v in pairs(Config.Garage.list) do
+    for k, v in pairs(Garage[gar].list) do
 		if v.rank then
-            if v.rank then 
-                for _, b in pairs(v.rank) do 
-                    if b == PlayerJob.grade.level then 
-                        if Config.enablepayment then
-                            local vehicle = {label = v.label, model = v.model, price = v.price, pricing = true}
-                            vehlist[#vehlist+1] = vehicle
-                        else
-                            local vehicle = {label = v.label, model = v.model, pricing = false}
-                            vehlist[#vehlist+1] = vehicle
-                        end
-                    end 
+            for _, b in pairs(v.rank) do 
+                if b == PlayerJob.grade.level then 
+                    if Config.enablepayment then
+                        local vehicle = {label = v.label, model = v.model, price = v.price, pricing = true, garage = gar}
+                        vehlist[#vehlist+1] = vehicle
+                    else
+                        local vehicle = {label = v.label, model = v.model, pricing = false, garage = gar}
+                        vehlist[#vehlist+1] = vehicle
+                    end
                 end 
-            end
+            end 
 		end
         SendNUIMessage({
             action = true,

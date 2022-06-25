@@ -1,19 +1,19 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-RegisterServerEvent('ik-policegarage:server:takemoney', function(data)
+RegisterServerEvent('ik-policegarage:server:takemoney', function(data, pos)
     xPlayer = QBCore.Functions.GetPlayer(source)
     if Config.enablepayment then
         if xPlayer.PlayerData.money['cash'] >= data.price then
             xPlayer.Functions.RemoveMoney('cash', data.price)
-            TriggerClientEvent('ik-policegarage:client:spawn', source, data.model)
+            TriggerClientEvent('ik-policegarage:client:spawn', source, data.model, pos, data.garage)
         elseif xPlayer.PlayerData.money['bank'] >= data.price then
             xPlayer.Functions.RemoveMoney('bank', data.price)
-            TriggerClientEvent('ik-policegarage:client:spawn', source, data.model)
+            TriggerClientEvent('ik-policegarage:client:spawn', source, data.model, pos, data.garage)
         else
             TriggerClientEvent('QBCore:Notify', source, "You don't have enough money", 'error', 3000)
         end
     else
-        TriggerClientEvent('ik-policegarage:client:spawn', source, data.model)
+        TriggerClientEvent('ik-policegarage:client:spawn', source, data.model, pos, data.garage)
     end
 end)
 
