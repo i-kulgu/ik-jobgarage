@@ -9,16 +9,14 @@ Config.fuelsystem = "ps-fuel" -- Set your fuel system, LegacyFuel, ps-fuel or ot
 
 Garage = {
     ["pdhq"] = {
-        jobname = "police",
+        jobname = "police", -- Job name for this garage
         plateprefix = "POLI", -- Set plate prefix, max 4 letters
         spawnloc = vector4(455.45, -1023.67, 28.46, 49.96), -- Spawn location of the car
-        spawnheading = 49.96,
-        viewcoords = vector3(454.75, -1020.45, 28.32),
-        pedhash = 's_m_y_hwaycop_01',
-        pedlocation = vector4(459.04, -1017.28, 27.16, 91.99),
-        spawn = vector3(459.04708, -1017.191, 28.15582),
-        out = vector3(451.67, -1019.81, 28.42),
-        list = {
+        spawnheading = 49.96, -- heading of the car
+        viewcoords = vector3(454.75, -1020.45, 28.32), -- cam coordinates
+        pedhash = 's_m_y_hwaycop_01', -- ped to be used
+        pedlocation = vector4(459.04, -1017.28, 27.16, 91.99), -- location of the ped
+        list = { -- list of cars to be used in this garage
             ["01"] = {
                 model = "policeb",
                 label = "Police Bike",
@@ -62,7 +60,7 @@ Garage = {
                 price = 0,
             },
         },
-        CarItems = {
+        CarItems = { -- list of items to put inside the vehicles for this garage
             [1] = {
                 name = "heavyarmor",
                 amount = 2,
@@ -85,7 +83,7 @@ Garage = {
                 slot = 3,
             },
         },
-        CarExtras = {
+        CarExtras = { -- Extra options to be enabled / disabled for this garage
             ["extras"] = {
                 ["1"] = true, -- on/off
                 ["2"] = true,
@@ -103,7 +101,7 @@ Garage = {
             },
             ["livery"] = 1,
         },
-        CarMods = {
+        CarMods = { -- Mods to be enabled / disabled for this garage
             engine = true,
             brakes = true,
             gearbox = true,
