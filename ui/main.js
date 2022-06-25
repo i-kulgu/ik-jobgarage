@@ -28,7 +28,7 @@ addEventListener("message",(e)=>{
             let label = $(this).data("label");
             let price = $(this).data("price");
             // $("#main-container").fadeOut()
-            $.post("https://ik-policegarage/buy",JSON.stringify({model,label,price}));
+            $.post("https://ik-jobgarage/buy",JSON.stringify({model,label,price}));
         
         })
         let lastmodel = 0;
@@ -37,12 +37,12 @@ addEventListener("message",(e)=>{
             let model = $(this).data("view");
             if(lastmodel != model){
                 lastmodel = model
-                $.post("https://ik-policegarage/showVeh",JSON.stringify({model}));
+                $.post("https://ik-jobgarage/showVeh",JSON.stringify({model}));
             }
         })
     } else if(data.action == "close") {
         $("#main-container").fadeOut()
-        $.post("https://ik-policegarage/close",JSON.stringify({}));
+        $.post("https://ik-jobgarage/close",JSON.stringify({}));
     }
 })
 
@@ -52,6 +52,6 @@ document.onkeydown = (e) =>{
     if(key == "Escape"){
 
         $("#main-container").fadeOut()
-        $.post("https://ik-policegarage/close",JSON.stringify({}));
+        $.post("https://ik-jobgarage/close",JSON.stringify({}));
     }
 }

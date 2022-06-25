@@ -84,24 +84,36 @@ local function PerformanceUpgradeVehicle(vehicle)
 end
 
 Citizen.CreateThread(function()
-        local hash = GetHashKey('s_m_y_hwaycop_01')
-        if not HasModelLoaded(hash) then
-            RequestModel(hash)
-            Wait(10)
-        end
-        while not HasModelLoaded(hash) do 
-            Wait(10)
-        end
+    local currentpednumber = 0
     for k, v in pairs(Garage) do
-        npc = CreatePed(5, hash, v.pedlocation, v.pedheading, false, false)
-        FreezeEntityPosition(npc, true)
-        SetBlockingOfNonTemporaryEvents(npc, true)
-        SetEntityInvincible(npc, true) --Don't let the ped die.
-        TaskStartScenarioInPlace(npc, "WORLD_HUMAN_CLIPBOARD", 0, true)
-        exports['qb-target']:AddBoxZone("npc"..k, v.pedlocation, 0.8, 0.6, {
-            name = "npc"..k, heading=v.pedheading, debugPoly=false, minZ=v.pedlocation.z - 2, maxZ=v.pedlocation.z + 2,}, {
-            options = {{ type = "client", event = "ik-policegarage:openUI", garage = k, icon = 'fas fa-garage', label = 'Police Garage', job = 'police' }},
-            distance = 1.5,})
+        exports['qb-target']:SpawnPed({
+            model = v.pedhash,
+            coords = v.pedlocation,
+            minusOne = true,
+            freeze = true,
+            invincible = true,
+            blockevents = true,
+            animDict = 'amb@world_human_clipboard@male@base',
+            anim = 'base',
+            flag = 1,
+            --scenario = 'WORLD_HUMAN_AA_COFFEE',
+            target = {
+            useModel = false,
+            options = {
+                {
+                num = 1,
+                type = "client",
+                event = "ik-jobgarage:openUI",
+                icon = 'fas fa-garage',
+                label = "Open Garage",
+                job = 'police',
+                garage = k
+                }
+            },
+            distance = 2.5, 
+            },
+            currentpednumber = currentpednumber + 1,
+        })
     end
 end)
 
@@ -130,7 +142,7 @@ RegisterNUICallback("showVeh", function(data,cb)
     SetVehicleExtra(veh, 2)
 end)
 
-RegisterNetEvent("ik-policegarage:client:spawn",function(model, pos, garage)
+RegisterNetEvent("ik-jobgarage:client:spawn",function(model, pos, garage)
     local ped = PlayerPedId()
     RequestModel(model)
     while not HasModelLoaded(model) do Wait(100) end
@@ -169,7 +181,7 @@ RegisterNUICallback("buy", function(data,cb)
     SendNUIMessage({
         action = 'close'
     })
-    TriggerServerEvent('ik-policegarage:server:takemoney', data, pos)
+    TriggerServerEvent('ik-jobgarage:server:takemoney', data, pos)
     SetEntityCoords(PlayerPedId(), lastpos.x, lastpos.y, lastpos.z)
     SetEntityVisible(PlayerPedId(), true)
     DeleteEntity(veh)
@@ -181,11 +193,11 @@ RegisterNUICallback("buy", function(data,cb)
     DoScreenFadeIn(500)
     Wait(500)
     if Config.savecar then
-        TriggerEvent('ik-policegarage:client:SaveCar')
+        TriggerEvent('ik-jobgarage:client:SaveCar')
     end
 end)
 
-RegisterNetEvent('ik-policegarage:client:SaveCar', function()
+RegisterNetEvent('ik-jobgarage:client:SaveCar', function()
     local ped = PlayerPedId()
     local veh = GetVehiclePedIsIn(ped)
     while veh == nil do Wait(100) end
@@ -195,7 +207,7 @@ RegisterNetEvent('ik-policegarage:client:SaveCar', function()
         local hash = props.model
         local vehname = GetDisplayNameFromVehicleModel(hash):lower()
         if QBCore.Shared.Vehicles[vehname] ~= nil and next(QBCore.Shared.Vehicles[vehname]) ~= nil then
-            TriggerServerEvent('ik-policegarage:server:SaveCarData', props, QBCore.Shared.Vehicles[vehname], hash, plate)
+            TriggerServerEvent('ik-jobgarage:server:SaveCarData', props, QBCore.Shared.Vehicles[vehname], hash, plate)
         else
             QBCore.Functions.Notify('You cant store this vehicle in your garage..', 'error')
         end
@@ -217,7 +229,7 @@ RegisterNUICallback("close", function()
     Wait(500)
 end)
 
-RegisterNetEvent("ik-policegarage:openUI",function(data)
+RegisterNetEvent("ik-jobgarage:openUI",function(data)
     local gar = data.garage
     local vehlist = {}
     changeCam()

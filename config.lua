@@ -9,12 +9,13 @@ Config.fuelsystem = "ps-fuel" -- Set your fuel system, LegacyFuel, ps-fuel or ot
 
 Garage = {
     ["pdhq"] = {
+        jobname = "police",
         plateprefix = "POLI", -- Set plate prefix, max 4 letters
         spawnloc = vector4(455.45, -1023.67, 28.46, 49.96), -- Spawn location of the car
         spawnheading = 49.96,
         viewcoords = vector3(454.75, -1020.45, 28.32),
-        pedlocation = vector3(459.04, -1017.28, 27.16),
-        pedheading = 91.99,
+        pedhash = 's_m_y_hwaycop_01',
+        pedlocation = vector4(459.04, -1017.28, 27.16, 91.99),
         spawn = vector3(459.04708, -1017.191, 28.15582),
         out = vector3(451.67, -1019.81, 28.42),
         list = {
