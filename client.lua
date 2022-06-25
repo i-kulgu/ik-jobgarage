@@ -1,6 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 local cam
-local lastpos
 local veh
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
@@ -84,43 +83,30 @@ local function PerformanceUpgradeVehicle(vehicle)
 end
 
 Citizen.CreateThread(function()
-    local currentpednumber = 0
+    local num = 0
     for k, v in pairs(Garage) do
-        exports['qb-target']:SpawnPed({
-            model = v.pedhash,
-            coords = v.pedlocation,
-            minusOne = true,
-            freeze = true,
-            invincible = true,
-            blockevents = true,
-            animDict = 'amb@world_human_clipboard@male@base',
-            anim = 'base',
-            flag = 1,
-            --scenario = 'WORLD_HUMAN_AA_COFFEE',
-            target = {
-            useModel = false,
-            options = {
-                {
-                num = 1,
-                type = "client",
-                event = "ik-jobgarage:openUI",
-                icon = 'fas fa-garage',
-                label = "Open Garage",
-                job = 'police',
-                garage = k
-                }
-            },
-            distance = 2.5, 
-            },
-            currentpednumber = currentpednumber + 1,
-        })
+        local hash = GetHashKey(v.pedhash)
+        if not HasModelLoaded(hash) then
+            RequestModel(hash)
+            Wait(10)
+        end
+        while not HasModelLoaded(hash) do 
+            Wait(10)
+        end
+        npc = CreatePed(5, hash, vector3(v.pedlocation.x,v.pedlocation.y,v.pedlocation.z), v.pedlocation.w, false, false)
+        FreezeEntityPosition(npc, true)
+        SetBlockingOfNonTemporaryEvents(npc, true)
+        SetEntityInvincible(npc, true) --Don't let the ped die.
+        TaskStartScenarioInPlace(npc, "WORLD_HUMAN_CLIPBOARD", 0, true)
+        exports['qb-target']:AddBoxZone("npc"..k, vector3(v.pedlocation.x,v.pedlocation.y,v.pedlocation.z), 0.8, 0.6, {
+            name = "npc"..k, heading=v.pedlocation.w, debugPoly=false, minZ=v.pedlocation.z - 2, maxZ=v.pedlocation.z + 2,}, {
+            options = {{ type = "client", event = "ik-jobgarage:openUI", garage = k, icon = 'fas fa-garage', label = 'Police Garage', job = v.jobname }},
+            distance = 1.5,})
     end
 end)
 
 function openUI(data,index,cb)
     local plyPed = PlayerPedId()
-    lastpos = GetEntityCoords(plyPed)
-    SetEntityCoords(plyPed, 453.16662, -1024.837, 28.514112)
     SetEntityVisible(plyPed, false)
     SetNuiFocus(true, true)
 end
@@ -182,7 +168,6 @@ RegisterNUICallback("buy", function(data,cb)
         action = 'close'
     })
     TriggerServerEvent('ik-jobgarage:server:takemoney', data, pos)
-    SetEntityCoords(PlayerPedId(), lastpos.x, lastpos.y, lastpos.z)
     SetEntityVisible(PlayerPedId(), true)
     DeleteEntity(veh)
     DoScreenFadeOut(500)
@@ -217,7 +202,6 @@ RegisterNetEvent('ik-jobgarage:client:SaveCar', function()
 end)
 
 RegisterNUICallback("close", function()
-    SetEntityCoords(PlayerPedId(), lastpos.x, lastpos.y, lastpos.z)
     SetEntityVisible(PlayerPedId(), true)
     DeleteEntity(veh)
     DoScreenFadeOut(500)
