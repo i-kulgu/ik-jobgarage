@@ -83,14 +83,13 @@ local function PerformanceUpgradeVehicle(vehicle)
 end
 
 Citizen.CreateThread(function()
-    local num = 0
     for k, v in pairs(Garage) do
         local hash = GetHashKey(v.pedhash)
         if not HasModelLoaded(hash) then
             RequestModel(hash)
             Wait(10)
         end
-        while not HasModelLoaded(hash) do 
+        while not HasModelLoaded(hash) do
             Wait(10)
         end
         npc = CreatePed(5, hash, vector3(v.pedlocation.x,v.pedlocation.y,v.pedlocation.z), v.pedlocation.w, false, false)
@@ -100,7 +99,7 @@ Citizen.CreateThread(function()
         TaskStartScenarioInPlace(npc, "WORLD_HUMAN_CLIPBOARD", 0, true)
         exports['qb-target']:AddBoxZone("npc"..k, vector3(v.pedlocation.x,v.pedlocation.y,v.pedlocation.z), 0.8, 0.6, {
             name = "npc"..k, heading=v.pedlocation.w, debugPoly=false, minZ=v.pedlocation.z - 2, maxZ=v.pedlocation.z + 2,}, {
-            options = {{ type = "client", event = "ik-jobgarage:openUI", garage = k, icon = 'fas fa-garage', label = 'Police Garage', job = v.jobname }},
+            options = {{ type = "client", event = "ik-jobgarage:openUI", garage = k,camcoords = v.camcoords,viewcoords = v.viewcoords, icon = 'fas fa-garage', label = 'Police Garage', job = v.jobname }},
             distance = 1.5,})
     end
 end)
@@ -215,12 +214,14 @@ end)
 
 RegisterNetEvent("ik-jobgarage:openUI",function(data)
     local gar = data.garage
+    local viewcoord = data.viewcoords
+    local camcoord = data.camcoords
     local vehlist = {}
-    changeCam()
+    changeCam(viewcoord, camcoord)
     for k, v in pairs(Garage[gar].list) do
 		if v.rank then
-            for _, b in pairs(v.rank) do 
-                if b == PlayerJob.grade.level then 
+            for _, b in pairs(v.rank) do
+                if b == PlayerJob.grade.level then
                     if Config.enablepayment then
                         local vehicle = {label = v.label, model = v.model, price = v.price, pricing = true, garage = gar}
                         vehlist[#vehlist+1] = vehicle
@@ -228,8 +229,8 @@ RegisterNetEvent("ik-jobgarage:openUI",function(data)
                         local vehicle = {label = v.label, model = v.model, pricing = false, garage = gar}
                         vehlist[#vehlist+1] = vehicle
                     end
-                end 
-            end 
+                end
+            end
 		end
         SendNUIMessage({
             action = true,
@@ -239,7 +240,7 @@ RegisterNetEvent("ik-jobgarage:openUI",function(data)
 	end
 end)
 
-function changeCam()
+function changeCam(viewcoord, camcoord)
     DoScreenFadeOut(500)
     Wait(1000)
     if not DoesCamExist(cam) then
@@ -248,8 +249,8 @@ function changeCam()
     SetCamActive(cam, true)
     SetCamRot(cam,vector3(-10.0,0.0, -155.999), true)
     SetCamFov(cam,80.0)
-    SetCamCoord(cam, vector3(451.19, -1014.72, 29.97))
-    PointCamAtCoord(cam, vector3(451.19, -1014.72, 29.97))
+    SetCamCoord(cam, camcoord)
+    PointCamAtCoord(cam, viewcoord)
     RenderScriptCams(true, false, 2500.0, true, true)
     DoScreenFadeIn(1000)
     Wait(1000)
