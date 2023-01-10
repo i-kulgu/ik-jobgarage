@@ -152,7 +152,7 @@ RegisterNetEvent("ik-jobgarage:client:spawn",function(model, pos, garage)
         end
         if Config.UseCarItems then
             SetCarItemsInfo()
-            TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Garage[garage].CarItems)
+            TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Config.CarItems)
         end
         if Config.MaxMod then
             PerformanceUpgradeVehicle(veh)
