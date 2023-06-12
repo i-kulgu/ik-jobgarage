@@ -1,5 +1,7 @@
 # ik-jobgarage
 
+If you like my work and want to support me : [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F2F3EU9ME)
+
 - Easy to configure multiple garages
 - Cars are based on job ranks for specific garage
 - Optional pricing for cars
